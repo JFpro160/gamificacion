@@ -28,6 +28,39 @@ class ObjetoTienda(BaseModel):
 class CompletarActividad(BaseModel):
     activity_id: int
 
+# Endpoint para crear un estudiante con su rockie
+@app.post("/crear_estudiante/")
+def crear_estudiante(estudiante: NuevoEstudiante):
+    # Crear el estudiante
+    estudiante_response = requests.post(f"{STUDENT_API_URL}/", json={"name": estudiante.nombre})
+    if estudiante_response.status_code != 201:
+        raise HTTPException(status_code=500, detail="Error al crear el estudiante")
+    nuevo_estudiante = estudiante_response.json()
+
+    # Crear el rockie para el estudiante
+    rockie_data = {
+        "id_estudiante": nuevo_estudiante["id"],
+        "nombre": estudiante.nombre,
+        "sombrero": None,
+        "cara": None,
+        "cuerpo": None,
+        "mano": None
+    }
+    rockie_response = requests.post(f"{ROCKIE_API_URL}/rockie/", json=rockie_data)
+    if rockie_response.status_code != 201:
+        raise HTTPException(status_code=500, detail="Error al crear el rockie")
+
+    return {"mensaje": "Estudiante y rockie creados exitosamente"}
+
+# Endpoint para consultar detalles de un estudiante
+@app.get("/estudiante/{student_id}")
+def obtener_estudiante(student_id: int):
+    student_response = requests.get(f"{STUDENT_API_URL}/estudiantes/{student_id}")
+    if student_response.status_code != 200:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    return student_response.json()
+
 # Endpoint para comprar un accesorio
 @app.put("/comprar_accesorio/")
 def comprar_accesorio(compra: CompraAccesorio):
@@ -95,22 +128,4 @@ def completar_actividad(student_id: int, activity: CompletarActividad):
         raise HTTPException(status_code=500, detail="Error al actualizar los RockieCoins del estudiante")
 
     return {"mensaje": "Actividad completada y RockieCoins actualizados"}
-
-# Endpoint para registrar un nuevo estudiante
-@app.post("/crear_estudiante/")
-def crear_estudiante(estudiante: NuevoEstudiante):
-    student_response = requests.post(f"{STUDENT_API_URL}/estudiantes/", json=estudiante.dict())
-    if student_response.status_code != 201:
-        raise HTTPException(status_code=500, detail="Error al crear el estudiante en la base de datos")
-
-    return {"mensaje": "Estudiante creado exitosamente"}
-
-# Endpoint para consultar detalles de un estudiante
-@app.get("/estudiante/{student_id}")
-def obtener_estudiante(student_id: int):
-    student_response = requests.get(f"{STUDENT_API_URL}/estudiantes/{student_id}")
-    if student_response.status_code != 200:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-
-    return student_response.json()
 
