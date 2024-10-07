@@ -65,7 +65,8 @@ def crear_estudiante(estudiante: NuevoEstudiante):
     print(f"Respuesta al crear rockie: {rockie_response.status_code}")
     print(f"Contenido de la respuesta del rockie: {rockie_response.text}")
 
-    if rockie_response.status_code != 201:
+    # Ajuste para aceptar tanto 200 como 201 como códigos válidos de respuesta para el rockie
+    if rockie_response.status_code not in [200, 201]:
         print("Error al crear el rockie. Respuesta inesperada del servicio de rockies.")
         raise HTTPException(status_code=500, detail="Error al crear el rockie")
 
