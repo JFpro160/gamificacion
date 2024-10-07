@@ -32,7 +32,7 @@ class CompletarActividad(BaseModel):
 @app.post("/crear_estudiante/")
 def crear_estudiante(estudiante: NuevoEstudiante):
     # Crear el estudiante
-    estudiante_response = requests.post(f"{STUDENT_API_URL}/", json={"name": estudiante.nombre})
+    estudiante_response = requests.post(f"{STUDENT_API_URL}/api/students", json={"name": estudiante.nombre})
     if estudiante_response.status_code != 201:
         raise HTTPException(status_code=500, detail="Error al crear el estudiante")
     nuevo_estudiante = estudiante_response.json()
