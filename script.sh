@@ -10,7 +10,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Declarar una variable para la IP
-IP_ADDRESS="54.161.161.3"
 
 # Usar la variable en las URLs
 export STUDENT_API_URL="http://$IP_ADDRESS:8002"
