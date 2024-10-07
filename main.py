@@ -51,15 +51,19 @@ def comprar_accesorio(compra: CompraAccesorio):
 
     print(f"Buscando ID interno del accesorio en la API de Rockie usando el UUID: {compra.accesorio_id}")
     # Buscar el accesorio en la base de datos de Rockie usando el UUID de DynamoDB
-    accesorio_db_response = requests.get(f"{ROCKIE_API_URL}/accesorios?dynamo_id={compra.accesorio_id}")
-    print(f"Respuesta al buscar accesorio en la base de datos de Rockie: {accesorio_db_response.status_code}")
-    print(f"Contenido de la respuesta al buscar accesorio: {accesorio_db_response.text}")
+accesorio_db_response = requests.get(f"{ROCKIE_API_URL}/accesorios?dynamo_id={compra.accesorio_id}")
+print(f"Respuesta al buscar accesorio en la base de datos de Rockie: {accesorio_db_response.status_code}")
+print(f"Contenido de la respuesta al buscar accesorio: {accesorio_db_response.text}")
 
-    if accesorio_db_response.status_code != 200:
-        raise HTTPException(status_code=404, detail="Accesorio no encontrado en la base de datos de Rockie")
+accesorio_db_data = accesorio_db_response.json()
 
-    accesorio_db_data = accesorio_db_response.json()
-    accesorio_id = accesorio_db_data.get("id_accesorio")
+# Manejar el caso en el que la respuesta es una lista
+if isinstance(accesorio_db_data, list) and len(accesorio_db_data) > 0:
+    accesorio_id = accesorio_db_data[0]["id_accesorio"]
+else:
+    raise HTTPException(status_code=404, detail="Accesorio no encontrado en la base de datos de Rockie")
+
+print(f"ID interno del accesorio obtenido: {accesorio_id}")
 
     print(f"Obteniendo datos del Rockie asociado al estudiante con ID: {compra.student_id}")
     rockie_response = requests.get(f"{ROCKIE_API_URL}/rockie/{compra.student_id}")
