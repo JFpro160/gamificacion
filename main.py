@@ -35,17 +35,21 @@ class CompletarActividad(BaseModel):
 # Endpoint para crear un estudiante con su rockie
 @app.post("/crear_estudiante/")
 def crear_estudiante(estudiante: NuevoEstudiante):
-    # Crear el estudiante
+    print(f"STUDENT_API_URL: {STUDENT_API_URL}")
     print("Enviando solicitud para crear estudiante...")
+
+    # Crear el estudiante
     estudiante_response = requests.post(f"{STUDENT_API_URL}/api/students", json={"name": estudiante.nombre})
     print(f"Respuesta al crear estudiante: {estudiante_response.status_code}")
     print(f"Contenido de la respuesta del estudiante: {estudiante_response.text}")
-    
-    if estudiante_response.status_code != 201:
+
+    # Ajuste para aceptar tanto 200 como 201 como códigos válidos de respuesta
+    if estudiante_response.status_code not in [200, 201]:
+        print("Error al crear el estudiante. Respuesta inesperada del servicio de estudiantes.")
         raise HTTPException(status_code=500, detail="Error al crear el estudiante")
-    
+
     nuevo_estudiante = estudiante_response.json()
-    print(f"Estudiante creado exitosamente: {nuevo_estudiante}")
+    print(f"Nuevo estudiante creado: {nuevo_estudiante}")
 
     # Crear el rockie para el estudiante
     rockie_data = {
@@ -56,12 +60,13 @@ def crear_estudiante(estudiante: NuevoEstudiante):
         "cuerpo": None,
         "mano": None
     }
-    print("Enviando solicitud para crear rockie...")
+    print("Enviando solicitud para crear el rockie asociado al estudiante...")
     rockie_response = requests.post(f"{ROCKIE_API_URL}/rockie/", json=rockie_data)
     print(f"Respuesta al crear rockie: {rockie_response.status_code}")
     print(f"Contenido de la respuesta del rockie: {rockie_response.text}")
-    
+
     if rockie_response.status_code != 201:
+        print("Error al crear el rockie. Respuesta inesperada del servicio de rockies.")
         raise HTTPException(status_code=500, detail="Error al crear el rockie")
 
     return {"mensaje": "Estudiante y rockie creados exitosamente"}
