@@ -161,7 +161,7 @@ def crear_objeto(objeto: ObjetoTienda):
         print(f"Respuesta al crear accesorio: {accesorio_response.status_code}")
         print(f"Contenido de la respuesta del accesorio: {accesorio_response.text}")
         
-        if accesorio_response.status_code != 201:
+        if accesorio_response.status_code not in [200, 201]:
             raise HTTPException(status_code=500, detail="Error al crear el accesorio en la base de datos de rockies")
 
     return {"mensaje": "Objeto creado exitosamente"}
