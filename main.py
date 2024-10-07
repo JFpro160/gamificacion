@@ -86,18 +86,45 @@ def comprar_accesorio(compra: CompraAccesorio):
 
     return {"mensaje": "Accesorio comprado y asignado al Rockie exitosamente"}
 
-# Endpoint para consultar detalles de un estudiante
-@app.get("/estudiante/{student_id}")
-def obtener_estudiante(student_id: int):
-    print(f"Obteniendo estudiante con ID: {student_id}")
-    student_response = requests.get(f"{STUDENT_API_URL}/api/students/{student_id}")
-    print(f"Respuesta al obtener estudiante: {student_response.status_code}")
-    print(f"Contenido de la respuesta del estudiante: {student_response.text}")
-    
-    if student_response.status_code != 200:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+# Endpoint para crear un estudiante con su rockie
+@app.post("/crear_estudiante/")
+def crear_estudiante(estudiante: NuevoEstudiante):
+    print(f"STUDENT_API_URL: {STUDENT_API_URL}")
+    print("Enviando solicitud para crear estudiante...")
 
-    return student_response.json()
+    # Crear el estudiante
+    estudiante_response = requests.post(f"{STUDENT_API_URL}/api/students", json={"name": estudiante.nombre})
+    print(f"Respuesta al crear estudiante: {estudiante_response.status_code}")
+    print(f"Contenido de la respuesta del estudiante: {estudiante_response.text}")
+
+    # Ajuste para aceptar tanto 200 como 201 como códigos válidos de respuesta
+    if estudiante_response.status_code not in [200, 201]:
+        print("Error al crear el estudiante. Respuesta inesperada del servicio de estudiantes.")
+        raise HTTPException(status_code=500, detail="Error al crear el estudiante")
+
+    nuevo_estudiante = estudiante_response.json()
+    print(f"Nuevo estudiante creado: {nuevo_estudiante}")
+
+    # Crear el rockie para el estudiante
+    rockie_data = {
+        "id_estudiante": nuevo_estudiante["id"],
+        "nombre": estudiante.nombre,
+        "sombrero": None,
+        "cara": None,
+        "cuerpo": None,
+        "mano": None
+    }
+    print("Enviando solicitud para crear el rockie asociado al estudiante...")
+    rockie_response = requests.post(f"{ROCKIE_API_URL}/rockie/", json=rockie_data)
+    print(f"Respuesta al crear rockie: {rockie_response.status_code}")
+    print(f"Contenido de la respuesta del rockie: {rockie_response.text}")
+
+    # Ajuste para aceptar tanto 200 como 201 como códigos válidos de respuesta para el rockie
+    if rockie_response.status_code not in [200, 201]:
+        print("Error al crear el rockie. Respuesta inesperada del servicio de rockies.")
+        raise HTTPException(status_code=500, detail="Error al crear el rockie")
+
+    return {"mensaje": "Estudiante y rockie creados exitosamente"}
 
 # Endpoint para comprar un accesorio
 @app.put("/comprar_accesorio/")
